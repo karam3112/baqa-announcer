@@ -1,0 +1,587 @@
+<title>إعلانات وفيات باقة</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap">
+<style>
+/* Layout: a form column beside a sticky poster preview; one column on phones. */
+:root{
+  --bg:#EEF2F0; --surface:#FFFFFF; --field:#F6F8F7; --ink:#121816; --muted:#55625F;
+  --line:#CDD6D2; --accent:#14453B; --on-accent:#FFFFFF;
+  --warn:#7A4300; --warn-bg:#FBEFD9; --ok:#14603F;
+  --font-ui:'IBM Plex Sans Arabic','Noto Sans Arabic',Tahoma,sans-serif;
+  --font-display:'Amiri','Noto Naskh Arabic','Traditional Arabic',serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0E1412; --surface:#161E1B; --field:#0F1715; --ink:#E7EDEA; --muted:#A3B0AC;
+    --line:#2C3733; --accent:#6CC5AD; --on-accent:#05211A;
+    --warn:#F2C078; --warn-bg:#35270F; --ok:#7FD3A8; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0E1412; --surface:#161E1B; --field:#0F1715; --ink:#E7EDEA; --muted:#A3B0AC;
+  --line:#2C3733; --accent:#6CC5AD; --on-accent:#05211A;
+  --warn:#F2C078; --warn-bg:#35270F; --ok:#7FD3A8; color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--font-ui);font-size:16px;line-height:1.6}
+.app{max-width:1080px;margin-inline:auto;padding-inline:16px;padding-block:24px 48px;display:flex;flex-direction:column;gap:20px}
+.top{display:flex;flex-direction:column;gap:2px}
+.top h1{margin:0;font-family:var(--font-display);font-weight:700;font-size:2.1rem;line-height:1.3;text-wrap:balance}
+.top p{margin:0;color:var(--muted)}
+.layout{display:grid;grid-template-columns:minmax(0,1fr);gap:20px;align-items:start}
+@media (min-width:900px){
+  .layout{grid-template-columns:minmax(0,1fr) minmax(0,400px)}
+  .side{position:sticky;top:calc(env(safe-area-inset-top,0px) + 16px)}
+}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:20px;display:flex;flex-direction:column;gap:22px;min-width:0}
+.group{display:flex;flex-direction:column;gap:14px;border:0;padding:0;margin:0;min-width:0}
+.group > legend{margin:0 0 10px;padding:0;font-size:.9rem;font-weight:600;color:var(--muted)}
+.row{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,200px),1fr));gap:14px}
+.field{display:flex;flex-direction:column;gap:6px;min-width:0}
+.field label, .field .lab{font-size:.9rem;font-weight:600}
+.field small{color:var(--muted);font-size:.82rem}
+input[type="text"], select, textarea{
+  width:100%;min-height:46px;padding:10px 12px;font:inherit;font-size:16px;color:var(--ink);
+  background:var(--field);border:1px solid var(--line);border-radius:10px;
+}
+textarea{min-height:120px;resize:vertical;line-height:1.7}
+input::placeholder, textarea::placeholder{color:var(--muted);opacity:.75}
+:is(input,select,textarea,button):focus-visible, .seg input:focus-visible + span{outline:2px solid var(--accent);outline-offset:2px}
+.prefixed{display:flex;align-items:stretch}
+.prefixed span{display:flex;align-items:center;padding-inline:12px;background:var(--bg);border:1px solid var(--line);border-inline-end:0;border-start-start-radius:10px;border-end-start-radius:10px;font-weight:600;white-space:nowrap}
+.prefixed input{border-start-start-radius:0;border-end-start-radius:0;min-width:0}
+.seg{display:flex;flex-wrap:wrap;gap:8px}
+.seg label{flex:1 1 auto;position:relative;cursor:pointer}
+.seg input{position:absolute;inset:0;opacity:0;margin:0;cursor:pointer}
+.seg span{display:flex;align-items:center;justify-content:center;min-height:46px;padding:8px 14px;text-align:center;border:1px solid var(--line);border-radius:10px;background:var(--field);font-weight:500}
+.seg input:checked + span{background:var(--accent);border-color:var(--accent);color:var(--on-accent);font-weight:600}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:50px;padding:10px 18px;font:inherit;font-weight:600;border-radius:12px;border:1px solid var(--accent);background:var(--accent);color:var(--on-accent);cursor:pointer}
+.btn.ghost{background:transparent;color:var(--ink);border-color:var(--line);min-height:44px;font-weight:500}
+.btn.link{background:transparent;border:0;color:var(--muted);min-height:44px;padding-inline:4px;text-decoration:underline;font-weight:500;align-self:flex-start}
+.side{display:flex;flex-direction:column;gap:12px;min-width:0}
+.poster{display:block;width:100%;max-width:100%;aspect-ratio:1080/1350;border:1px solid var(--line);border-radius:12px;background:#F2F4F3}
+.actions{display:flex;flex-direction:column;gap:10px}
+.msg{margin:0;font-size:.92rem;color:var(--muted)}
+.msg.warn{color:var(--warn);background:var(--warn-bg);padding:10px 12px;border-radius:10px}
+.msg.ok{color:var(--ok);font-weight:600}
+details{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:10px 14px}
+summary{cursor:pointer;font-weight:600;min-height:32px;display:flex;align-items:center}
+details .inner{display:flex;flex-direction:column;gap:10px;padding-block:10px 4px}
+details textarea{min-height:200px;font-size:15px}
+@media (prefers-reduced-motion:no-preference){.seg span,.btn{transition:background-color .15s,color .15s}}
+</style>
+
+<div class="app" dir="rtl" lang="ar">
+  <header class="top">
+    <h1>إعلانات وفيات باقة</h1>
+    <p>عبّئ التفاصيل، والصورة تجهز مباشرة.</p>
+  </header>
+
+  <div class="layout">
+    <form class="panel" id="form" autocomplete="off">
+      <fieldset class="group">
+        <legend>نوع الإعلان</legend>
+        <div class="seg">
+          <label><input type="radio" name="kind" id="kindDeath" value="death" checked><span>إعلان عن وفاة</span></label>
+          <label><input type="radio" name="kind" id="kindFuneral" value="funeral"><span>إعلان عن تشييع جنازة</span></label>
+        </div>
+      </fieldset>
+
+      <fieldset class="group">
+        <legend>المتوفّى</legend>
+        <div class="seg">
+          <label><input type="radio" name="gender" id="genderM" value="m" checked><span>المرحوم</span></label>
+          <label><input type="radio" name="gender" id="genderF" value="f"><span>المرحومة</span></label>
+        </div>
+        <div class="field">
+          <label for="name">الاسم الثلاثي</label>
+          <input type="text" id="name" placeholder="الاسم الثلاثي" inputmode="text">
+        </div>
+        <div class="row">
+          <div class="field">
+            <label for="kunya">الكنية <small>(اختياري)</small></label>
+            <div class="prefixed"><span id="kunyaPrefix">أبو</span><input type="text" id="kunya" placeholder="اسم الابن"></div>
+          </div>
+          <div class="field">
+            <label for="extra">تعريف إضافي <small>(اختياري)</small></label>
+            <input type="text" id="extra" placeholder="مثال: حرم فلان">
+          </div>
+        </div>
+      </fieldset>
+
+      <fieldset class="group" id="funeralFields" hidden>
+        <legend>التشييع</legend>
+        <div class="row">
+          <div class="field">
+            <label for="time">الساعة</label>
+            <input type="text" id="time" placeholder="مثال: ٤:٣٠ عصرًا">
+          </div>
+          <div class="field">
+            <label for="from">من</label>
+            <input type="text" id="from" list="fromList" placeholder="اسم المسجد أو بيته">
+            <datalist id="fromList"></datalist>
+          </div>
+          <div class="field">
+            <label for="cemetery">إلى المقبرة</label>
+            <input type="text" id="cemetery" list="cemList" placeholder="اسم المقبرة">
+            <datalist id="cemList"></datalist>
+          </div>
+        </div>
+      </fieldset>
+
+      <fieldset class="group" id="azaFields" hidden>
+        <legend>بيت العزاء</legend>
+        <div class="seg">
+          <label><input type="radio" name="aza" id="azaYes" value="yes" checked><span>يوجد بيت عزاء</span></label>
+          <label><input type="radio" name="aza" id="azaNo" value="no"><span>لا يوجد بيت عزاء</span></label>
+          <label><input type="radio" name="aza" id="azaNone" value="none"><span>بدون ملاحظة</span></label>
+        </div>
+        <div class="row" id="azaYesFields">
+          <div class="field">
+            <label for="menPlace">عزاء الرجال في</label>
+            <input type="text" id="menPlace" value="ديوان باقة" list="menList">
+            <datalist id="menList"></datalist>
+          </div>
+          <div class="field">
+            <label for="womenPlace">عزاء النساء في</label>
+            <input type="text" id="womenPlace" placeholder="بيت المرحوم">
+          </div>
+          <div class="field">
+            <label for="startDay">يبدأ يوم</label>
+            <select id="startDay"></select>
+          </div>
+          <div class="field">
+            <label for="endDay">ينتهي يوم</label>
+            <select id="endDay"></select>
+          </div>
+        </div>
+        <div class="field" id="noteField">
+          <label for="note">نص الملاحظة <small>(يمكنك تعديله، وكل سطر فقرة)</small></label>
+          <textarea id="note"></textarea>
+          <button type="button" class="btn link" id="noteReset" hidden>الرجوع إلى النص التلقائي</button>
+        </div>
+      </fieldset>
+
+      <button type="button" class="btn link" id="clearAll">تفريغ النموذج لإعلان جديد</button>
+    </form>
+
+    <aside class="side">
+      <img class="poster" id="poster" alt="معاينة صورة الإعلان">
+      <div class="actions">
+        <p class="msg" id="missing" hidden></p>
+        <button type="button" class="btn" id="download">تنزيل الصورة</button>
+        <p class="msg" id="holdHint" hidden></p>
+        <p class="msg" id="status" role="status" aria-live="polite" hidden></p>
+      </div>
+      <details>
+        <summary>نص الإعلان للنشر مع الصورة</summary>
+        <div class="inner">
+          <textarea id="caption" readonly></textarea>
+          <button type="button" class="btn ghost" id="copy">نسخ النص</button>
+        </div>
+      </details>
+    </aside>
+  </div>
+</div>
+
+<script>
+(function () {
+  const $ = (id) => document.getElementById(id);
+  const DAYS = ['الأحد', 'الاثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت'];
+  const CHANNEL = 't.me/baqaelgharbeya';
+  // QR for https://t.me/baqaelgharbeya, 29 modules a side, one hex number per row.
+  const QR = '1fc1877f,105b8241,1745225d,175c595d,1757d65d,10463041,1fd5557f,1c1c00,bd250da,78e46be,134ae8dc,3a83839,1a6f85ca,1a26c555,1770c6e9,110ff01f,10cf0c2a,14a3431c,1e43523d,1d9232c7,1ed44bfe,1eaf1c,1fcb3354,1058571b,17592bf3,175e8426,174eadb7,1050d45d,1fc363f0'
+    .split(',').map((h) => parseInt(h, 16).toString(2).padStart(29, '0'));
+
+  const W = 1080, H = 1350, PAD = 80, CW = W - PAD * 2, RIGHT = W - PAD;
+  const HEAD_H = 255, FOOT_TOP = 1121;
+  const SANS = "'IBM Plex Sans Arabic','Noto Sans Arabic',Tahoma,sans-serif";
+  const SERIF = "Amiri,'Noto Naskh Arabic','Traditional Arabic',serif";
+  const C = { bg: '#F2F4F3', ink: '#121816', muted: '#55625F', line: '#CBD3D0', cellLine: '#D5DCD9', headMuted: '#C9D3D0', noteBg: '#E4EAE8', ph: '#97A3A0' };
+  const VERSE = '﴿ إنّا لله وإنّا إليه راجعون ﴾';
+
+  const cv = document.createElement('canvas');
+  cv.width = W; cv.height = H;
+  const ctx = cv.getContext('2d');
+
+  let noteEdited = false, endTouched = false;
+
+  /* ---------- reading the form ---------- */
+  const val = (id) => $(id).value.trim().replace(/\s+/g, ' ');
+  const radio = (name) => document.querySelector('input[name="' + name + '"]:checked').value;
+
+  function read() {
+    const kind = radio('kind');
+    return {
+      kind, female: radio('gender') === 'f',
+      name: val('name'), kunya: val('kunya'), extra: val('extra'),
+      time: val('time'), from: val('from'), cem: val('cemetery'),
+      aza: kind === 'funeral' ? radio('aza') : 'none',
+      note: $('note').value.split('\n').map((s) => s.trim()).filter(Boolean)
+    };
+  }
+
+  function missing(s) {
+    const m = [];
+    if (!s.name) m.push('الاسم الثلاثي');
+    if (s.kind === 'funeral') {
+      if (!s.time) m.push('الساعة');
+      if (!s.from) m.push('مكان الانطلاق');
+      if (!s.cem) m.push('اسم المقبرة');
+      if (s.aza !== 'none' && !s.note.length) m.push('نص الملاحظة');
+    }
+    return m;
+  }
+
+  function autoNote() {
+    const aza = radio('aza'), female = radio('gender') === 'f';
+    if (aza === 'none') return '';
+    if (aza === 'no') {
+      return 'لا يوجد بيت عزاء نهائيًا، لا للرّجال ولا للنّساء، برجاء عدم الإحراج.\nالعزاءُ سيكون بعد تشييع الجنازة في المقبرة.';
+    }
+    const men = val('menPlace') || 'ديوان باقة';
+    const women = val('womenPlace') || (female ? 'بيت المرحومة' : 'بيت المرحوم');
+    const s = +$('startDay').value, e = +$('endDay').value;
+    const startWord = s === new Date().getDay() ? 'من اليوم' : 'من يوم';
+    return 'بيت العزاء للرّجال سيكون في ' + men + ' لمدة ثلاثة أيام، ويبدأ ' + startWord + ' (' + DAYS[s] + ') بعد صلاة العصر مباشرة، وينتهي يوم (' + DAYS[e] + ') بعد صلاة العشاء بساعة.\n' +
+      'بالنسبة للنّساء سيكون العزاء في ' + women + ' بنفس مواعيد الرّجال.';
+  }
+
+  function identity(s) {
+    const parts = [];
+    if (s.kunya) parts.push('(' + (s.female ? 'أم' : 'أبو') + ' ' + s.kunya + ')');
+    if (s.extra) parts.push(s.extra);
+    return parts;
+  }
+
+  function caption(s) {
+    const id = identity(s);
+    let who = (s.female ? 'انتقلت' : 'انتقل') + ' إلى رحمته تعالى ' + (s.name || '[الاسم الثلاثي]');
+    if (s.kunya) who += ' ' + id[0];
+    if (s.extra) who += '، ' + s.extra;
+    const lines = ['السلام عليكم ورحمة الله وبركاته', ''];
+    if (s.kind === 'death') {
+      lines.push('إعلان عن وفاة', '', who + '، ولم تحدد ساعة تشييع الجنازة حتى الآن، وسنعلن عنها في وقتها بإذن الله تعالى.');
+    } else {
+      lines.push('إعلان عن تشييع جنازة', '', who + '، وسيشيع ' + (s.female ? 'جثمانها' : 'جثمانه') + ' الساعة ' + (s.time || '[الساعة]') +
+        ' من ' + (s.from || '[المكان]') + ' إلى المقبرة (' + (s.cem || '[اسم المقبرة]') + ').');
+    }
+    lines.push('', '( .. إنّا لله وإنّا إليه راجعون )');
+    if (s.aza !== 'none' && s.note.length) {
+      lines.push('', (s.aza === 'no' ? 'للتنويه: ' : 'ملاحظة: ') + s.note.join('\n'));
+    }
+    return lines.join('\n');
+  }
+
+  /* ---------- drawing ---------- */
+  function setFont(weight, size, fam) { ctx.font = weight + ' ' + size + 'px ' + fam; }
+
+  function wrapLines(text, maxW) {
+    const words = text.split(/\s+/).filter(Boolean), lines = [];
+    let cur = '';
+    for (const w of words) {
+      const t = cur ? cur + ' ' + w : w;
+      if (!cur || ctx.measureText(t).width <= maxW) cur = t;
+      else { lines.push(cur); cur = w; }
+    }
+    if (cur) lines.push(cur);
+    return lines.length ? lines : [''];
+  }
+
+  function textBlock(o) {
+    const maxW = o.maxW || CW;
+    setFont(o.weight, o.size, o.fam);
+    const lines = wrapLines(o.text, maxW), lineH = o.size * o.lh;
+    const x = o.x != null ? o.x : (o.align === 'center' ? W / 2 : RIGHT);
+    return {
+      h: lines.length * lineH,
+      draw(y) {
+        setFont(o.weight, o.size, o.fam);
+        ctx.fillStyle = o.color; ctx.direction = 'rtl';
+        ctx.textAlign = o.align || 'right'; ctx.textBaseline = 'middle';
+        lines.forEach((l, i) => ctx.fillText(l, x, y + (i + 0.5) * lineH));
+      }
+    };
+  }
+
+  // Shrinks the type until the text fits one line; wraps only at the smallest size.
+  function fitBlock(o, minSize) {
+    let size = o.size;
+    setFont(o.weight, size, o.fam);
+    while (size > minSize && ctx.measureText(o.text).width > (o.maxW || CW)) {
+      size -= 2; setFont(o.weight, size, o.fam);
+    }
+    return textBlock(Object.assign({}, o, { size }));
+  }
+
+  function roundRect(x, y, w, h, r) {
+    ctx.beginPath();
+    ctx.moveTo(x + r, y);
+    ctx.arcTo(x + w, y, x + w, y + h, r);
+    ctx.arcTo(x + w, y + h, x, y + h, r);
+    ctx.arcTo(x, y + h, x, y, r);
+    ctx.arcTo(x, y, x + w, y, r);
+    ctx.closePath();
+  }
+
+  function cellsBlock(k, cells) {
+    const gap = 16, cw = (CW - gap * 2) / 3, padX = 22 * k, padY = 16 * k;
+    const inner = cw - padX * 2, labelSize = 22 * k, labelH = labelSize * 1.5;
+    let size = 34 * k;
+    const minSize = 24 * k;
+    const widest = () => Math.max.apply(null, cells.map((c) => ctx.measureText(c.value).width));
+    setFont(600, size, SANS);
+    while (size > minSize && widest() > inner) { size -= 1; setFont(600, size, SANS); }
+    const vals = cells.map((c) => textBlock({ text: c.value, size, weight: 600, fam: SANS, lh: 1.4, color: c.missing ? C.ph : C.ink, maxW: inner, x: 0 }));
+    const valH = Math.max.apply(null, vals.map((v) => v.h));
+    const h = padY * 2 + labelH + 2 * k + valH;
+    return {
+      h,
+      draw(y) {
+        cells.forEach((c, i) => {
+          const xr = RIGHT - i * (cw + gap);
+          roundRect(xr - cw, y, cw, h, 16);
+          ctx.fillStyle = '#FFFFFF'; ctx.fill();
+          ctx.lineWidth = 1; ctx.strokeStyle = C.cellLine; ctx.stroke();
+          textBlock({ text: c.label, size: labelSize, weight: 400, fam: SANS, lh: 1.5, color: C.muted, x: xr - padX }).draw(y + padY);
+          textBlock({ text: c.value, size, weight: 600, fam: SANS, lh: 1.4, color: c.missing ? C.ph : C.ink, maxW: inner, x: xr - padX }).draw(y + padY + labelH + 2 * k);
+        });
+      }
+    };
+  }
+
+  function noteBlock(k, s, accent) {
+    const strong = s.aza === 'no';
+    const padX = 30 * k, padY = (strong ? 24 : 22) * k, gap = 6 * k, x = RIGHT - padX, maxW = CW - padX * 2;
+    const parts = [textBlock({ text: strong ? 'للتنويه' : 'ملاحظة', size: 24 * k, weight: 700, fam: SANS, lh: 1.5, color: strong ? C.headMuted : accent, x, maxW })];
+    s.note.forEach((p, i) => {
+      const lead = strong && i === 0;
+      parts.push(textBlock({ text: p, size: (lead ? 30 : 26) * k, weight: lead ? 600 : 400, fam: SANS, lh: lead ? 1.6 : 1.65, color: strong ? '#FFFFFF' : C.ink, x, maxW }));
+    });
+    const h = padY * 2 + parts.reduce((a, p) => a + p.h, 0) + gap * (parts.length - 1);
+    return {
+      h,
+      draw(y) {
+        roundRect(PAD, y, CW, h, 20);
+        ctx.fillStyle = strong ? accent : C.noteBg; ctx.fill();
+        let yy = y + padY;
+        parts.forEach((p) => { p.draw(yy); yy += p.h + gap; });
+      }
+    };
+  }
+
+  function buildMiddle(s, k, accent) {
+    const T = (text, size, weight, lh, color, extra) => textBlock(Object.assign({ text, size: size * k, weight, fam: SANS, lh, color }, extra || {}));
+    const id = identity(s).join(' · ');
+    const nameText = s.name || '[الاسم الثلاثي]';
+    const nameColor = s.name ? C.ink : C.ph;
+    const items = [];
+    if (s.kind === 'death') {
+      items.push(T(s.female ? 'انتقلت إلى رحمته تعالى' : 'انتقل إلى رحمته تعالى', 34, 400, 1.6, C.muted));
+      items.push(fitBlock({ text: nameText, size: 84 * k, weight: 700, fam: SERIF, lh: 1.3, color: nameColor }, 58 * k));
+      if (id) items.push(T(id, 36, 500, 1.55, C.ink));
+      items.push(44 * k);
+      items.push(T('لم تُحدَّد ساعة تشييع الجنازة حتى الآن، وسنعلن عنها في وقتها بإذن الله تعالى.', 34, 400, 1.75, C.ink));
+      items.push(44 * k);
+      items.push(textBlock({ text: VERSE, size: 48 * k, weight: 400, fam: SERIF, lh: 1.5, color: accent, align: 'center' }));
+      return items;
+    }
+    const hasNote = s.aza !== 'none' && s.note.length > 0;
+    const g = (hasNote ? 24 : 40) * k;
+    items.push(T(s.female ? 'انتقلت إلى رحمته تعالى' : 'انتقل إلى رحمته تعالى', 32, 400, 1.5, C.muted));
+    items.push(fitBlock({ text: nameText, size: 84 * k, weight: 700, fam: SERIF, lh: 1.25, color: nameColor }, 58 * k));
+    if (id) items.push(T(id, 34, 500, 1.5, C.ink));
+    items.push(g);
+    items.push(T(s.female ? 'وسيُشيَّع جثمانها' : 'وسيُشيَّع جثمانه', 28, 400, 1.5, C.muted));
+    items.push(10 * k);
+    items.push(cellsBlock(k, [
+      { label: 'الساعة', value: s.time || '[الساعة]', missing: !s.time },
+      { label: 'من', value: s.from || '[المكان]', missing: !s.from },
+      { label: 'إلى المقبرة', value: s.cem || '[المقبرة]', missing: !s.cem }
+    ]));
+    items.push(g);
+    items.push(textBlock({ text: VERSE, size: 44 * k, weight: 400, fam: SERIF, lh: 1.4, color: accent, align: 'center' }));
+    if (hasNote) { items.push(g); items.push(noteBlock(k, s, accent)); }
+    return items;
+  }
+
+  const heightOf = (items) => items.reduce((a, it) => a + (typeof it === 'number' ? it : it.h), 0);
+
+  function render(s) {
+    const accent = s.kind === 'death' ? '#1E2423' : '#14453B';
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.fillStyle = C.bg; ctx.fillRect(0, 0, W, H);
+
+    // Header band
+    ctx.fillStyle = accent; ctx.fillRect(0, 0, W, HEAD_H);
+    textBlock({ text: 'السلام عليكم ورحمة الله وبركاته', size: 30, weight: 400, fam: SANS, lh: 1.5, color: C.headMuted }).draw(56);
+    textBlock({ text: s.kind === 'death' ? 'إعلان عن وفاة' : 'إعلان عن تشييع جنازة', size: 72, weight: 700, fam: SANS, lh: 1.25, color: '#FFFFFF' }).draw(117);
+
+    // Middle: scale the type down a step at a time until everything fits.
+    const room = FOOT_TOP - HEAD_H, avail = room - 48;
+    let k = 1, items = buildMiddle(s, k, accent), total = heightOf(items);
+    while (total > avail && k > 0.56) { k -= 0.03; items = buildMiddle(s, k, accent); total = heightOf(items); }
+    let y = HEAD_H + Math.max(16, (room - total) / 2);
+    items.forEach((it) => { if (typeof it === 'number') y += it; else { it.draw(y); y += it.h; } });
+
+    // Footer: channel link and QR
+    ctx.fillStyle = C.line; ctx.fillRect(PAD, FOOT_TOP, CW, 1);
+    const qy = FOOT_TOP + 33;
+    roundRect(PAD, qy, 140, 140, 16);
+    ctx.fillStyle = '#FFFFFF'; ctx.fill();
+    ctx.lineWidth = 1; ctx.strokeStyle = C.cellLine; ctx.stroke();
+    ctx.fillStyle = C.ink;
+    QR.forEach((row, r) => { for (let c = 0; c < 29; c++) if (row[c] === '1') ctx.fillRect(PAD + 12 + c * 4, qy + 12 + r * 4, 4, 4); });
+
+    fitBlock({ text: 'تابعوا الإعلان عن الوفيات في باقة الغربية على تلجرام', size: 26, weight: 400, fam: SANS, lh: 1.5, color: C.muted, maxW: 740 }, 20).draw(qy + 21);
+    setFont(600, 36, SANS);
+    ctx.direction = 'ltr'; ctx.textAlign = 'right'; ctx.textBaseline = 'middle'; ctx.fillStyle = C.ink;
+    const ly = qy + 21 + 39 + 8 + 25;
+    ctx.fillText(CHANNEL, RIGHT, ly);
+    const lw = ctx.measureText(CHANNEL).width;
+    ctx.save();
+    ctx.translate(RIGHT - lw - 14 - 34, ly - 17);
+    ctx.scale(34 / 24, 34 / 24);
+    ctx.lineWidth = 1.8; ctx.lineCap = 'round'; ctx.lineJoin = 'round'; ctx.strokeStyle = C.ink;
+    ctx.stroke(new Path2D('M22 2 11 13'));
+    ctx.stroke(new Path2D('M22 2 15 22l-4-9-9-4 20-7z'));
+    ctx.restore();
+  }
+
+  /* ---------- page wiring ---------- */
+  let posterUrl = null, timer = null;
+
+  function refresh() {
+    const s = read();
+    render(s);
+    cv.toBlob((blob) => {
+      if (!blob) return;
+      const url = URL.createObjectURL(blob);
+      $('poster').src = url;
+      if (posterUrl) URL.revokeObjectURL(posterUrl);
+      posterUrl = url;
+    }, 'image/png');
+    const miss = missing(s);
+    $('missing').hidden = miss.length === 0;
+    $('missing').textContent = miss.length ? 'قبل التنزيل ينقص: ' + miss.join('، ') : '';
+    $('caption').value = caption(s);
+  }
+
+  function schedule() { clearTimeout(timer); timer = setTimeout(refresh, 120); }
+
+  function syncUI() {
+    const funeral = radio('kind') === 'funeral', aza = radio('aza'), female = radio('gender') === 'f';
+    $('funeralFields').hidden = !funeral;
+    $('azaFields').hidden = !funeral;
+    $('azaYesFields').hidden = aza !== 'yes';
+    $('noteField').hidden = aza === 'none';
+    $('kunyaPrefix').textContent = female ? 'أم' : 'أبو';
+    $('kunya').placeholder = female ? 'اسم الابن أو البنت' : 'اسم الابن';
+    $('womenPlace').placeholder = female ? 'بيت المرحومة' : 'بيت المرحوم';
+    $('from').placeholder = female ? 'اسم المسجد أو بيتها' : 'اسم المسجد أو بيته';
+    $('noteReset').hidden = !noteEdited;
+    if (!noteEdited) $('note').value = autoNote();
+  }
+
+  function setStatus(text, kind) {
+    const el = $('status');
+    el.hidden = !text; el.textContent = text || '';
+    el.className = 'msg' + (kind ? ' ' + kind : '');
+  }
+
+  function setDays() {
+    const today = new Date().getDay();
+    $('startDay').value = String(today);
+    $('endDay').value = String((today + 2) % 7);
+    endTouched = false;
+  }
+
+  ['startDay', 'endDay'].forEach((id) => {
+    DAYS.forEach((d, i) => { const o = document.createElement('option'); o.value = String(i); o.textContent = d; $(id).appendChild(o); });
+  });
+  setDays();
+
+  function onChange(e) {
+    const t = e.target;
+    if (t.id === 'note') noteEdited = true;
+    if (t.name === 'aza') noteEdited = false;
+    if (t.id === 'endDay') endTouched = true;
+    if (t.id === 'startDay' && !endTouched) $('endDay').value = String((+t.value + 2) % 7);
+    syncUI(); setStatus(''); schedule();
+  }
+  $('form').addEventListener('input', onChange);
+  $('form').addEventListener('change', onChange);
+  $('form').addEventListener('submit', (e) => e.preventDefault());
+
+  $('noteReset').addEventListener('click', () => { noteEdited = false; syncUI(); schedule(); });
+  $('clearAll').addEventListener('click', () => {
+    $('form').reset(); noteEdited = false; setDays(); syncUI(); setStatus(''); refresh();
+    $('name').focus();
+  });
+
+  /* Remembered suggestions for places (this device only). */
+  const STORE = { from: 'baqa.from', cemetery: 'baqa.cem', menPlace: 'baqa.men' };
+  const LISTS = { from: 'fromList', cemetery: 'cemList', menPlace: 'menList' };
+  function loadList(key) { try { return JSON.parse(localStorage.getItem(key)) || []; } catch (e) { return []; } }
+  function fillLists() {
+    Object.keys(STORE).forEach((id) => {
+      const dl = $(LISTS[id]); dl.textContent = '';
+      loadList(STORE[id]).forEach((v) => { const o = document.createElement('option'); o.value = v; dl.appendChild(o); });
+    });
+  }
+  function remember() {
+    Object.keys(STORE).forEach((id) => {
+      const v = val(id); if (!v) return;
+      const list = [v].concat(loadList(STORE[id]).filter((x) => x !== v)).slice(0, 10);
+      try { localStorage.setItem(STORE[id], JSON.stringify(list)); } catch (e) { /* suggestions are optional */ }
+    });
+    fillLists();
+  }
+  fillLists();
+
+  /* Saving the image */
+  const HOLD_HINT = 'اضغط مطوّلًا على الصورة ثم اختر «حفظ الصورة».';
+  const downloadsReady = (window.claude && window.claude.use) ? window.claude.use('downloads').catch(() => null) : Promise.resolve(null);
+  downloadsReady.then((d) => { if (!d) { $('download').hidden = true; $('holdHint').hidden = false; $('holdHint').textContent = 'لحفظ الصورة: ' + HOLD_HINT; } });
+
+  $('download').addEventListener('click', async () => {
+    const s = read(), miss = missing(s);
+    if (miss.length) { setStatus('أكمل أولًا: ' + miss.join('، '), 'warn'); return; }
+    render(s);
+    const blob = await new Promise((res) => cv.toBlob(res, 'image/png'));
+    const downloads = await downloadsReady;
+    if (!downloads || !blob) { setStatus(HOLD_HINT); return; }
+    const filename = (s.kind === 'death' ? 'إعلان-وفاة-' : 'تشييع-جنازة-') + s.name.replace(/\s+/g, '-') + '.png';
+    try {
+      await downloads.save({ filename, data: blob });
+      remember();
+      setStatus('حُفظت الصورة.', 'ok');
+    } catch (err) {
+      const code = err && err.code;
+      if (code === 'declined') setStatus('لم تُحفظ الصورة.');
+      else if (code === 'rate_limited') setStatus('نافذة الحفظ ما زالت مفتوحة. أكملها أو انتظر قليلًا ثم أعد المحاولة.', 'warn');
+      else setStatus('تعذّر الحفظ من الزر. ' + HOLD_HINT, 'warn');
+    }
+  });
+
+  $('copy').addEventListener('click', () => {
+    const ta = $('caption');
+    const done = () => { $('copy').textContent = 'نُسخ النص'; setTimeout(() => { $('copy').textContent = 'نسخ النص'; }, 1800); };
+    const fallback = () => { ta.focus(); ta.select(); $('copy').textContent = 'النص محدَّد، انسخه يدويًا'; };
+    try { navigator.clipboard.writeText(ta.value).then(done, fallback); } catch (e) { fallback(); }
+  });
+
+  /* First paint, then again once the web fonts arrive. */
+  syncUI(); refresh();
+  if (document.fonts && document.fonts.load) {
+    const sample = 'إعلان عن وفاة';
+    Promise.all([
+      document.fonts.load("400 30px 'IBM Plex Sans Arabic'", sample),
+      document.fonts.load("500 30px 'IBM Plex Sans Arabic'", sample),
+      document.fonts.load("600 30px 'IBM Plex Sans Arabic'", sample),
+      document.fonts.load("700 30px 'IBM Plex Sans Arabic'", sample),
+      document.fonts.load('400 30px Amiri', VERSE),
+      document.fonts.load('700 30px Amiri', sample)
+    ]).then(refresh, refresh);
+  }
+})();
+</script>
