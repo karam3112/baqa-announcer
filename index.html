@@ -307,7 +307,13 @@ details textarea{min-height:200px;font-size:15px}
   function textBlock(o) {
     const maxW = o.maxW || CW;
     setFont(o.weight, o.size, o.fam);
-    const lines = wrapLines(o.text, maxW), lineH = o.size * o.lh;
+    let lines = wrapLines(o.text, maxW);
+    if (o.balance && lines.length > 1) {
+      // Narrow the measure while the line count holds, so a long name splits evenly instead of leaving one word alone.
+      const n = lines.length;
+      for (let w = maxW - 10; w > 0 && wrapLines(o.text, w).length === n; w -= 10) lines = wrapLines(o.text, w);
+    }
+    const lineH = o.size * o.lh;
     const x = o.x != null ? o.x : (o.align === 'center' ? W / 2 : RIGHT);
     return {
       h: lines.length * lineH,
@@ -393,20 +399,20 @@ details textarea{min-height:200px;font-size:15px}
     const nameColor = s.name ? C.ink : C.ph;
     const items = [];
     if (s.kind === 'death') {
-      items.push(T(s.female ? 'انتقلت إلى رحمته تعالى' : 'انتقل إلى رحمته تعالى', 34, 400, 1.6, C.muted));
-      items.push(fitBlock({ text: nameText, size: 84 * k, weight: 700, fam: SANS, lh: 1.35, color: nameColor }, 58 * k));
-      if (id) items.push(T(id, 36, 500, 1.55, C.ink));
+      items.push(T(s.female ? 'انتقلت إلى رحمته تعالى' : 'انتقل إلى رحمته تعالى', 34, 400, 1.6, C.muted, { align: 'center' }));
+      items.push(fitBlock({ text: nameText, size: 84 * k, weight: 700, fam: SANS, lh: 1.35, color: nameColor, align: 'center', balance: true }, 58 * k));
+      if (id) items.push(T(id, 36, 500, 1.55, C.ink, { align: 'center' }));
       items.push(44 * k);
-      items.push(T('لم تُحدَّد ساعة تشييع الجنازة حتى الآن، وسنعلن عنها في وقتها بإذن الله تعالى.', 34, 400, 1.75, C.ink));
+      items.push(T('لم تُحدَّد ساعة تشييع الجنازة حتى الآن، وسنعلن عنها في وقتها بإذن الله تعالى.', 34, 400, 1.75, C.ink, { align: 'center' }));
       items.push(44 * k);
       items.push(textBlock({ text: VERSE, size: 48 * k, weight: 400, fam: SERIF, lh: 1.5, color: accent, align: 'center' }));
       return items;
     }
     const hasNote = s.aza !== 'none' && s.note.length > 0;
     const g = (hasNote ? 24 : 40) * k;
-    items.push(T(s.female ? 'انتقلت إلى رحمته تعالى' : 'انتقل إلى رحمته تعالى', 32, 400, 1.5, C.muted));
-    items.push(fitBlock({ text: nameText, size: 84 * k, weight: 700, fam: SANS, lh: 1.3, color: nameColor }, 58 * k));
-    if (id) items.push(T(id, 34, 500, 1.5, C.ink));
+    items.push(T(s.female ? 'انتقلت إلى رحمته تعالى' : 'انتقل إلى رحمته تعالى', 32, 400, 1.5, C.muted, { align: 'center' }));
+    items.push(fitBlock({ text: nameText, size: 84 * k, weight: 700, fam: SANS, lh: 1.3, color: nameColor, align: 'center', balance: true }, 58 * k));
+    if (id) items.push(T(id, 34, 500, 1.5, C.ink, { align: 'center' }));
     items.push(g);
     items.push(T(s.female ? 'وسيُشيَّع جثمانها' : 'وسيُشيَّع جثمانه', 30, 400, 1.5, C.muted));
     items.push(10 * k);
@@ -430,8 +436,8 @@ details textarea{min-height:200px;font-size:15px}
 
     // Header band
     ctx.fillStyle = accent; ctx.fillRect(0, 0, W, HEAD_H);
-    textBlock({ text: 'السلام عليكم ورحمة الله وبركاته', size: 32, weight: 400, fam: SANS, lh: 1.5, color: C.headMuted }).draw(56);
-    textBlock({ text: s.kind === 'death' ? 'إعلان عن وفاة' : 'إعلان عن تشييع جنازة', size: 72, weight: 700, fam: SANS, lh: 1.25, color: '#FFFFFF' }).draw(117);
+    textBlock({ text: 'السلام عليكم ورحمة الله وبركاته', size: 32, weight: 400, fam: SANS, lh: 1.5, color: C.headMuted, align: 'center' }).draw(56);
+    textBlock({ text: s.kind === 'death' ? 'إعلان عن وفاة' : 'إعلان عن تشييع جنازة', size: 72, weight: 700, fam: SANS, lh: 1.25, color: '#FFFFFF', align: 'center' }).draw(117);
 
     // Middle: scale the type down a step at a time until everything fits.
     const room = FOOT_TOP - HEAD_H, avail = room - 48;
@@ -576,7 +582,8 @@ details textarea{min-height:200px;font-size:15px}
     return (s.kind === 'death' ? 'إعلان-وفاة-' : 'تشييع-جنازة-') + name + '.png';
   }
 
-  // On phones the PNG goes straight to Telegram through the system share sheet, with the caption as its text.
+  // On phones the PNG goes straight to Telegram through the system share sheet. Image only: the owner did not
+  // want the caption sent along (it stays in the copy box).
   // navigator.share runs synchronously from the tap (iOS drops the gesture across an await), so it uses the
   // blob that refresh() already made.
   const canShareFiles = !inClaude && !!(navigator.canShare && navigator.canShare({ files: [new File([''], 'x.png', { type: 'image/png' })] }));
@@ -586,7 +593,7 @@ details textarea{min-height:200px;font-size:15px}
     if (miss.length) { setStatus('أكمل أولًا: ' + miss.join('، '), 'warn'); return; }
     if (pending || !posterBlob) { setStatus('الصورة تتجهّز، اضغط مرة أخرى.'); return; }
     const file = new File([posterBlob], fileName(s), { type: 'image/png' });
-    navigator.share({ files: [file], text: caption(s) }).then(
+    navigator.share({ files: [file] }).then(
       () => { remember(); setStatus('تمت المشاركة.', 'ok'); },
       (err) => {
         if (err && err.name === 'AbortError') setStatus('');

@@ -51,7 +51,8 @@ times like `4:30` fall back to Tahoma. The canvas is redrawn once those loads re
 ## Getting the image to Telegram
 
 - **Share** (`#share`): shown only where `navigator.canShare({files})` is true (phones, and Chrome on
-  Windows). It opens the system share sheet with the PNG and the caption as text; the user picks Telegram
+  Windows). It opens the system share sheet with the PNG only. The owner did not want the caption sent along:
+  Telegram posted it as a second message. The caption stays in the copy box. The user picks Telegram
   and then the channel. It uses the blob that `refresh()` already made, so `navigator.share` runs inside
   the tap; iOS rejects it after an `await`. If an edit is still debouncing, it asks the user to tap again.
 - **Download** stays, and becomes the secondary (ghost) button when share is available.
@@ -79,6 +80,10 @@ it to make an image in the channel's style. The owner accepted this.
   The alternative is the "no condolence house" notice, drawn as a dark box. The note text is an
   editable textarea; once edited it stops auto-regenerating until "reset" is pressed.
 - Gender switches: `انتقل/انتقلت`, `أبو/أم`, `جثمانه/جثمانها`, `بيت المرحوم/المرحومة`.
+- Alignment (owner's request after testing on a phone): the header lines, the "انتقل" line, the name and the
+  identity line are centred, and so is the death-notice sentence. In the funeral notice the "وسيُشيَّع" label,
+  the cells and the note box stay right-aligned. A name too long for one line is split into two balanced
+  lines (`balance: true`), so a single word is not left alone on the second line.
 - Download is blocked while a required field is empty (name; for funerals also time, from, cemetery).
 
 ## Poster palette
@@ -93,8 +98,7 @@ minimal design over ornament.
 - The layout on a real phone (only "no horizontal scroll at 420px" was checked).
 - The artifact version's download button inside Claude.
 
-- The share button on a real phone (Android Chrome, iOS Safari), including whether Telegram keeps the
-  caption text together with the image.
+- The share button on iOS Safari (it worked on the owner's phone).
 
 ## Ideas discussed, not built
 
