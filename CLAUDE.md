@@ -60,7 +60,10 @@ times like `4:30` fall back to Tahoma. The canvas is redrawn once those loads re
 
 ## Hosting
 
-GitHub Pages from the repo root (`index.html`). The page has `noindex`, but anyone with the link can use
+Live at <https://karam3112.github.io/baqa-announcer/>, served by GitHub Pages from `main`, repo root
+(repo `karam3112/baqa-announcer`). Pushing to `main` updates the site within a minute or two. The remote
+URL carries `karam3112@` because this machine's default GitHub login is a different account.
+ The page has `noindex`, but anyone with the link can use
 it to make an image in the channel's style. The owner accepted this.
 
 ## Wording decisions (agreed with the owner — keep them)
