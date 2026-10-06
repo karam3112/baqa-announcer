@@ -81,9 +81,11 @@ it to make an image in the channel's style. The owner accepted this.
   editable textarea; once edited it stops auto-regenerating until "reset" is pressed.
 - Gender switches: `انتقل/انتقلت`, `أبو/أم`, `جثمانه/جثمانها`, `بيت المرحوم/المرحومة`.
 - Alignment (owner's request after testing on a phone): the header lines, the "انتقل" line, the name and the
-  identity line are centred, and so is the death-notice sentence. In the funeral notice the "وسيُشيَّع" label,
+  identity lines are centred, and so is the death-notice sentence. In the funeral notice the "وسيُشيَّع" label,
   the cells and the note box stay right-aligned. A name too long for one line is split into two balanced
   lines (`balance: true`), so a single word is not left alone on the second line.
+- The kunya `(أبو/أم ...)` and the extra description (e.g. `حرم فلان`) are on separate lines under the
+  name, with no separator dot. Either may be missing, so each line stands alone.
 - Download is blocked while a required field is empty (name; for funerals also time, from, cemetery).
 
 ## Poster palette
@@ -94,11 +96,9 @@ minimal design over ornament.
 
 ## Not verified yet
 
-- Scanning the canvas-drawn QR from a downloaded image.
-- The layout on a real phone (only "no horizontal scroll at 420px" was checked).
+- iPhone (iOS Safari), including the share button. The owner's phone works: the page, sharing to Telegram,
+  and scanning the QR.
 - The artifact version's download button inside Claude.
-
-- The share button on iOS Safari (it worked on the owner's phone).
 
 ## Ideas discussed, not built
 
