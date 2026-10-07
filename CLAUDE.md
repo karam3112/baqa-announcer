@@ -25,7 +25,9 @@ channel and communicates in Arabic. All user-facing copy is Arabic and the page 
 Everything is drawn on an off-screen `<canvas>` (not DOM-to-image), so Arabic shaping is the
 browser's own and export is exact. `render(s)` draws three zones:
 
-1. Header band, 255px tall: greeting + title. Accent is `#1E2423` for a death notice and `#14453B`
+1. Header band, 255px tall: greeting, title, and the announcement date (e.g. `الأربعاء 7 تشرين الأول 2026`:
+   Levantine month names, Latin digits, Gregorian only). The date comes from a date field that defaults to
+   today; if it is cleared, the date line is dropped and the title moves back down. Accent is `#1E2423` for a death notice and `#14453B`
    for a funeral notice, so the two are told apart at a glance.
 2. Middle, between y=255 and y=1121: built by `buildMiddle(s, k, accent)` as a list of blocks and
    gaps, vertically centred. If the content is taller than the space, `k` (a type-scale factor)

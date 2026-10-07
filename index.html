@@ -51,7 +51,7 @@ body{background:var(--bg);color:var(--ink);font-family:var(--font-ui);font-size:
 .field{display:flex;flex-direction:column;gap:6px;min-width:0}
 .field label, .field .lab{font-size:.9rem;font-weight:600}
 .field small{color:var(--muted);font-size:.82rem}
-input[type="text"], select, textarea{
+input[type="text"], input[type="date"], select, textarea{
   width:100%;min-height:46px;padding:10px 12px;font:inherit;font-size:16px;color:var(--ink);
   background:var(--field);border:1px solid var(--line);border-radius:10px;
 }
@@ -97,6 +97,10 @@ details textarea{min-height:200px;font-size:15px}
         <div class="seg">
           <label><input type="radio" name="kind" id="kindDeath" value="death" checked><span>إعلان عن وفاة</span></label>
           <label><input type="radio" name="kind" id="kindFuneral" value="funeral"><span>إعلان عن تشييع جنازة</span></label>
+        </div>
+        <div class="field">
+          <label for="date">تاريخ الإعلان</label>
+          <input type="date" id="date">
         </div>
       </fieldset>
 
@@ -203,6 +207,7 @@ details textarea{min-height:200px;font-size:15px}
 (function () {
   const $ = (id) => document.getElementById(id);
   const DAYS = ['الأحد', 'الاثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت'];
+  const MONTHS = ['كانون الثاني', 'شباط', 'آذار', 'نيسان', 'أيار', 'حزيران', 'تموز', 'آب', 'أيلول', 'تشرين الأول', 'تشرين الثاني', 'كانون الأول'];
   const CHANNEL = 't.me/baqaelgharbeya';
   // QR for https://t.me/baqaelgharbeya, 29 modules a side, one hex number per row.
   const QR = '1fc1877f,105b8241,1745225d,175c595d,1757d65d,10463041,1fd5557f,1c1c00,bd250da,78e46be,134ae8dc,3a83839,1a6f85ca,1a26c555,1770c6e9,110ff01f,10cf0c2a,14a3431c,1e43523d,1d9232c7,1ed44bfe,1eaf1c,1fcb3354,1058571b,17592bf3,175e8426,174eadb7,1050d45d,1fc363f0'
@@ -232,9 +237,22 @@ details textarea{min-height:200px;font-size:15px}
       kind, female: radio('gender') === 'f',
       name: val('name'), kunya: val('kunya'), extra: val('extra'),
       time: val('time'), from: val('from'), cem: val('cemetery'),
+      date: dateText($('date').value),
       aza: kind === 'funeral' ? radio('aza') : 'none',
       note: $('note').value.split('\n').map((s) => s.trim()).filter(Boolean)
     };
+  }
+
+  // "2026-10-07" -> "الأربعاء 7 تشرين الأول 2026"; empty when the field is cleared.
+  function dateText(v) {
+    const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(v);
+    if (!m) return '';
+    const d = new Date(+m[1], +m[2] - 1, +m[3]);
+    return DAYS[d.getDay()] + ' ' + d.getDate() + ' ' + MONTHS[d.getMonth()] + ' ' + d.getFullYear();
+  }
+  function todayValue() {
+    const d = new Date(), p = (n) => String(n).padStart(2, '0');
+    return d.getFullYear() + '-' + p(d.getMonth() + 1) + '-' + p(d.getDate());
   }
 
   function missing(s) {
@@ -437,8 +455,10 @@ details textarea{min-height:200px;font-size:15px}
 
     // Header band
     ctx.fillStyle = accent; ctx.fillRect(0, 0, W, HEAD_H);
-    textBlock({ text: 'السلام عليكم ورحمة الله وبركاته', size: 32, weight: 400, fam: SANS, lh: 1.5, color: C.headMuted, align: 'center' }).draw(56);
-    textBlock({ text: s.kind === 'death' ? 'إعلان عن وفاة' : 'إعلان عن تشييع جنازة', size: 72, weight: 700, fam: SANS, lh: 1.25, color: '#FFFFFF', align: 'center' }).draw(117);
+    const titleY = s.date ? 82 : 117;
+    textBlock({ text: 'السلام عليكم ورحمة الله وبركاته', size: 32, weight: 400, fam: SANS, lh: 1.5, color: C.headMuted, align: 'center' }).draw(titleY - 61);
+    textBlock({ text: s.kind === 'death' ? 'إعلان عن وفاة' : 'إعلان عن تشييع جنازة', size: 72, weight: 700, fam: SANS, lh: 1.25, color: '#FFFFFF', align: 'center' }).draw(titleY);
+    if (s.date) textBlock({ text: s.date, size: 30, weight: 500, fam: SANS, lh: 1.5, color: C.headMuted, align: 'center' }).draw(titleY + 96);
 
     // Middle: scale the type down a step at a time until everything fits.
     const room = FOOT_TOP - HEAD_H, avail = room - 48;
@@ -519,6 +539,7 @@ details textarea{min-height:200px;font-size:15px}
   }
 
   function setDays() {
+    $('date').value = todayValue();
     const today = new Date().getDay();
     $('startDay').value = String(today);
     $('endDay').value = String((today + 2) % 7);
