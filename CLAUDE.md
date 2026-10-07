@@ -25,9 +25,15 @@ channel and communicates in Arabic. All user-facing copy is Arabic and the page 
 Everything is drawn on an off-screen `<canvas>` (not DOM-to-image), so Arabic shaping is the
 browser's own and export is exact. `render(s)` draws three zones:
 
-1. Header band, 255px tall: greeting, title, and the announcement date (e.g. `الأربعاء 7 تشرين الأول 2026`:
-   Levantine month names, Latin digits, Gregorian only). The date comes from a date field that defaults to
-   today; if it is cleared, the date line is dropped and the title moves back down. Accent is `#1E2423` for a death notice and `#14453B`
+1. Header band, 255px tall: greeting, title, and the announcement date, Gregorian and Hijri on one line
+   (`الأربعاء 7 تشرين الأول 2026م  ·  25 ربيع الآخر 1448هـ`). The owner approved Levantine month names. Digits
+   are Latin. The date comes from a date field that defaults to today. If the field is cleared, the date line
+   is dropped and the title moves back down.
+   The Hijri date must match Palestine (the Mufti of Jerusalem's monthly moon-sighting announcements). No
+   formula gives that, so it is Umm al-Qura (`Intl`, `islamic-umalqura`) shifted by a day correction (`hijriShift`,
+   default -1, stored in `localStorage` as `baqa.hijriShift`). The form shows the Hijri date with day −/+ buttons
+   to correct it. The -1 was verified for Rabi' al-Akhir 1448: Palestine began it on Sunday 13 Sept 2026, while
+   Umm al-Qura began it on the 12th. If `Intl` lacks that calendar, the Hijri part is left out. Accent is `#1E2423` for a death notice and `#14453B`
    for a funeral notice, so the two are told apart at a glance.
 2. Middle, between y=255 and y=1121: built by `buildMiddle(s, k, accent)` as a list of blocks and
    gaps, vertically centred. If the content is taller than the space, `k` (a type-scale factor)
